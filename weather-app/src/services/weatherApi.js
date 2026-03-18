@@ -1,7 +1,7 @@
 import { mockWeatherData } from './mockData';
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY || ''; 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = '/api';
 
 const transformWeatherData = (current, forecast) => {
   // Hourly: next 8 timestamps (24 hours)
