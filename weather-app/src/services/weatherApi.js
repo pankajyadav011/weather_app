@@ -56,18 +56,27 @@ export const getWeatherData = async (city) => {
   try {
     const currentRes = await fetch(`${BASE_URL}/weather?city=${city}`);
     if (!currentRes.ok) {
-      const errorData = await currentRes.json();
-      throw new Error(errorData.error || 'City not found');
+      const contentType = currentRes.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const errorData = await currentRes.json();
+        throw new Error(errorData.error || 'City not found');
+      } else {
+        const errorText = await currentRes.text();
+        console.error("Non-JSON error response:", errorText);
+        throw new Error(`Server error (${currentRes.status}). Please check if API key is set.`);
+      }
     }
     const current = await currentRes.json();
 
     const forecastRes = await fetch(`${BASE_URL}/forecast?city=${city}`);
+    if (!forecastRes.ok) {
+        throw new Error("Failed to fetch forecast data");
+    }
     const forecast = await forecastRes.json();
 
     return transformWeatherData(current, forecast);
   } catch (error) {
     console.error("Error fetching weather:", error);
-    // Fallback to mock data only if specifically needed, but user wants real data
     throw error;
   }
 };
@@ -76,10 +85,21 @@ export const getWeatherData = async (city) => {
 export const getWeatherDataByCoords = async (lat, lon) => {
   try {
     const currentRes = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lon}`);
-    if (!currentRes.ok) throw new Error('Location not found');
+    if (!currentRes.ok) {
+      const contentType = currentRes.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const errorData = await currentRes.json();
+        throw new Error(errorData.error || 'Location not found');
+      } else {
+        throw new Error(`Server error (${currentRes.status}). Please check if API key is set.`);
+      }
+    }
     const current = await currentRes.json();
 
     const forecastRes = await fetch(`${BASE_URL}/forecast?lat=${lat}&lon=${lon}`);
+    if (!forecastRes.ok) {
+        throw new Error("Failed to fetch forecast data");
+    }
     const forecast = await forecastRes.json();
 
     return transformWeatherData(current, forecast);

@@ -1,6 +1,6 @@
-const axios = require('axios');
+import axios from 'axios';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   const { city, lat, lon, units = 'metric' } = req.query;
   const API_KEY = process.env.OPENWEATHER_API_KEY;
 
